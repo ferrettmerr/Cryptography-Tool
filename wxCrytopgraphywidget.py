@@ -9,7 +9,9 @@ from pprint import pprint
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(500,500))
+        self.width = 700
+        self.height= 600
+        wx.Frame.__init__(self, parent, title=title, size=(self.width,self.height))
 
         self.init_gui()
         self.init_menu()
@@ -20,13 +22,13 @@ class MainWindow(wx.Frame):
         self.panel = wx.Panel(self)
 
         # Static text
-        self.encrypt_txt = wx.StaticText(self.panel, label="Encrypted text", pos=(330, 75))
-        self.decrypt_txt = wx.StaticText(self.panel, label="Decrypted text", pos=(50, 75))
+        self.encrypt_txt = wx.StaticText(self.panel, label="Encrypted text", pos=(400, 450))
+        self.decrypt_txt = wx.StaticText(self.panel, label="Decrypted text", pos=(75, 450))
 
         # Textboxs
-        self.decrypted = wx.TextCtrl(self.panel, -1, '',pos=(10,100), size=(200, 150), style=wx.TE_MULTILINE)
-        self.encrypted = wx.TextCtrl(self.panel, -1, '',pos=(290,100), size=(200, 150), style=wx.TE_MULTILINE)
-        self.key = wx.StaticText(self.panel, label="", pos=(100, 300), size=(200, 150))
+        self.decrypted = wx.TextCtrl(self.panel, -1, '',pos=(10,150),  size=(250, 300), style=wx.TE_MULTILINE)
+        self.encrypted = wx.TextCtrl(self.panel, -1, '',pos=(340,150), size=(250, 300), style=wx.TE_MULTILINE)
+        self.key = wx.StaticText(self.panel, label="", pos=(100, 550), size=(200, 300))
            
         #self.CreateStatusBar() # A StatusBar in the bottom of the window
         self.widgetSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -35,11 +37,11 @@ class MainWindow(wx.Frame):
 
         # Creating the Combo box
         ciphers = ['Shift', 'Affine', 'Substitution', 'Permutation','Vigenere', 'One Time Pad', 'Hill' ]
-        self.combo_box = wx.ComboBox(self.panel, -1, pos=(100, 10), size=(250, -1), choices=ciphers, style=wx.CB_READONLY)
+        self.combo_box = wx.ComboBox(self.panel, -1, pos=(self.width/3, 10), size=(250, -1), choices=ciphers, style=wx.CB_READONLY)
 
         # Encrypt and Decrypt Buttons
-        self.encrypt_btn = wx.Button(self.panel, 1, '>>', pos=(225,125),size=(50, 100))
-        self.decrypt_btn = wx.Button(self.panel, 1, '<<', pos=(225,170),size=(50, 100))
+        self.encrypt_btn = wx.Button(self.panel, 1, '>>', pos=(275,175),size=(50, 100))
+        self.decrypt_btn = wx.Button(self.panel, 1, '<<', pos=(275,220),size=(50, 100))
    
         # self.Bind(wx.EVT_BUTTON, self.OnClose, id=1)
 
@@ -58,20 +60,6 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 
-
-    def remove_dynamic_widgets(self):
-        # TODO clean up method, sloppy
-        isGUICleared = True
-        while isGUICleared:
-            if self.widgetSizer.GetChildren():#Make into for loop, didn't work when I did it
-                self.widgetSizer.Hide(self.number_of_buttons-1)
-                self.widgetSizer.Remove(self.number_of_buttons-1)
-                self.number_of_buttons -= 1
-            else:
-                isGUICleared =  False
-
-            
-
     def OnAbout(self,e):
         # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
         dlg = wx.MessageDialog( self, "A Cryptographic learning tool built by Lawrence Brewer and Walter Seme.", "Cryptographic Learning Tool", wx.OK)
@@ -82,7 +70,8 @@ class MainWindow(wx.Frame):
         self.Close(True)  # Close the frame.
 
     def OnSelect(self, event):      
-        self.remove_dynamic_widgets();
+        self.widgetSizer.DeleteWindows()
+
         # Reset encrypted text field only, incase same message wants to be used for different encryptions
         self.encrypted.SetValue("")
 
@@ -106,7 +95,6 @@ class MainWindow(wx.Frame):
 
 
     def set_to_shift(self):
-        # self.key.SetLabel("Shift by:")
         shift_txt = wx.StaticText(self.panel, label="Shift by:", pos=(100, 50))
         
         shiftAmounts = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25']
@@ -145,19 +133,55 @@ class MainWindow(wx.Frame):
         # need a-z mapping, use dictionary
         dictionary = dict.fromkeys(string.ascii_uppercase, 0)#init each value to 0
 
-        # for value in dictionary:
+        pos_x = 10
+        pos_y = 50
+        index = 0
+
+        count_of_btns = 0
+
+        remaining_values = dictionary.keys()
+
+        
+        for key in dictionary.keys():
+            letter_label = wx.StaticText(self.panel,label=key+":", pos=(pos_x, pos_y))
+            pos_x += 20
+            letter_btn = wx.ComboBox(self.panel, -1, pos=(pos_x,pos_y), size=(50, -1),choices=dictionary.keys(), style=wx.CB_READONLY)
+            letter_btn.Bind(wx.EVT_COMBOBOX, self.on_letter_choice)
+            pos_x += 55
+            index += 1
+            count_of_btns += 2
+            if index > len(dictionary)/3:
+                pos_x =10
+                pos_y += 20
+                index = 0
+
+            self.widgetSizer.Add(letter_label, 0, wx.ALL, 5)
+            self.widgetSizer.Add(letter_btn, 0, wx.ALL, 5)
+
+
+
+
+
             # create label + input field
             # add to widgetsizer & numberOfBtns
             # if half way create new row (use 2 rows)
         pprint(dictionary)
-        self.key.SetLabel("Substitution")
+        # self.key.SetLabel("Substitution")
         # add validation method and display somehow
+
+    def on_letter_choice(self, e):
+        remaining_values = array.fromstring(string.ascii_uppercase)
 
     def set_to_permutation(self):
         self.key.SetLabel("Perumation")
 
     def set_to_vigenere(self):
-        self.key.SetLabel("Vigenere")
+        keyword_txt = wx.StaticText(self.panel, label="keyword:", pos=(self.width/3 -65, 50))
+        keyword = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,50), size=(250, -1))#TODO parse for only ascii string
+
+        self.widgetSizer.Add(keyword_txt, 0, wx.ALL, 5)
+        self.widgetSizer.Add(keyword, 0, wx.ALL, 5)
+     
 
     def setToOneTimePad(self):
         self.key.SetLabel("One Time pad")
