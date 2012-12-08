@@ -11,12 +11,12 @@ class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(500,500))
 
-        self.initStaticGUI()
-        self.initMenu()
+        self.init_gui()
+        self.init_menu()
         self.Show(True)
 
 
-    def initStaticGUI(self):
+    def init_gui(self):
         self.panel = wx.Panel(self)
 
         # Static text
@@ -46,7 +46,7 @@ class MainWindow(wx.Frame):
         # Set events.
         self.Bind(wx.EVT_COMBOBOX, self.OnSelect, self.combo_box)#If not bound to button, will effect all buttons
 
-    def initMenu(self):
+    def init_menu(self):
         filemenu= wx.Menu()
         menuBar = wx.MenuBar()
 
@@ -59,11 +59,11 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 
 
-    def removeDynamicGUI(self):
+    def remove_dynamic_widgets(self):
         # TODO clean up method, sloppy
         isGUICleared = True
         while isGUICleared:
-            if self.widgetSizer.GetChildren():#Make for loop, didn't work when I did it
+            if self.widgetSizer.GetChildren():#Make into for loop, didn't work when I did it
                 self.widgetSizer.Hide(self.number_of_buttons-1)
                 self.widgetSizer.Remove(self.number_of_buttons-1)
                 self.number_of_buttons -= 1
@@ -82,7 +82,7 @@ class MainWindow(wx.Frame):
         self.Close(True)  # Close the frame.
 
     def OnSelect(self, event):      
-        self.removeDynamicGUI();
+        self.remove_dynamic_widgets();
         # Reset encrypted text field only, incase same message wants to be used for different encryptions
         self.encrypted.SetValue("")
 
@@ -90,22 +90,22 @@ class MainWindow(wx.Frame):
         # No switch statement in python, use dictionary with functions
         # But that didn't work because every function would be called
         if cipher == "Shift":
-            self.setToShift()
+            self.set_to_shift()
         elif cipher == "Affine":
-            self.setToAffine()
+            self.set_to_affine()
         elif cipher == "Substitution":
-            self.setToSubstitution()
+            self.set_to_substitution()
         elif cipher == "Permutation":
-            self.setToPermutation()
+            self.set_to_permutation()
         elif cipher == "Vigenere":
-            self.setToVigenere()
+            self.set_to_vigenere()
         elif cipher == "One Time Pad":
             self.setToOneTimePad()
         elif cipher == "Hill":
-            self.setToHill()
+            self.set_to_hill()
 
 
-    def setToShift(self):
+    def set_to_shift(self):
         # self.key.SetLabel("Shift by:")
         shift_txt = wx.StaticText(self.panel, label="Shift by:", pos=(100, 50))
         
@@ -123,7 +123,7 @@ class MainWindow(wx.Frame):
         # self.encrypted.SetValue("Encrypted message")
         # self.decrypted.SetValue("Decrypted message")
 
-    def setToAffine(self):
+    def set_to_affine(self):
         a_txt = wx.StaticText(self.panel, label="A:", pos=(135, 52))
         b_txt = wx.StaticText(self.panel, label="B:", pos=(235, 52))
 
@@ -141,7 +141,7 @@ class MainWindow(wx.Frame):
         self.number_of_buttons += 4
 
 
-    def setToSubstitution(self):
+    def set_to_substitution(self):
         # need a-z mapping, use dictionary
         dictionary = dict.fromkeys(string.ascii_uppercase, 0)#init each value to 0
 
@@ -153,20 +153,18 @@ class MainWindow(wx.Frame):
         self.key.SetLabel("Substitution")
         # add validation method and display somehow
 
-    def setToPermutation(self):
+    def set_to_permutation(self):
         self.key.SetLabel("Perumation")
 
-    def setToVigenere(self):
+    def set_to_vigenere(self):
         self.key.SetLabel("Vigenere")
 
     def setToOneTimePad(self):
         self.key.SetLabel("One Time pad")
 
-    def setToHill(self):
+    def set_to_hill(self):
         self.key.SetLabel("Hill")
 
-    def setToRSA(self):
-        self.key.SetLabel("RSA")
 
 
 app = wx.App(False)
