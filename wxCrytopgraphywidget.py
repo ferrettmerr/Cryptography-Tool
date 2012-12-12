@@ -2,7 +2,6 @@
 import os
 import wx
 import string
-import affine
 import re
 from cryptography import *
 
@@ -51,12 +50,10 @@ class MainWindow(wx.Frame):
         # Encrypt and Decrypt Buttons
         self.encrypt_btn = wx.Button(self.panel, 1, '>>', pos=(self.width/2 -25,175),size=(50, 100))
         self.decrypt_btn = wx.Button(self.panel, 2, '<<', pos=(self.width/2 -25,220),size=(50, 100))
-   
-        # self.Bind(wx.EVT_BUTTON, self.OnClose, id=1)
 
         # Set events.
         self.Bind(wx.EVT_COMBOBOX, self.OnSelect, self.combo_box)#If not bound to button, will effect all buttons
-        self.Bind(wx.EVT_BUTTON, self.encrypt_pressed, self.encrypt_btn)#If not bound to button, will effect all buttons
+        self.Bind(wx.EVT_BUTTON, self.encrypt_pressed, self.encrypt_btn)
         self.Bind(wx.EVT_BUTTON, self.decrypt_pressed, self.decrypt_btn)
 
     def init_menu(self):
@@ -64,7 +61,6 @@ class MainWindow(wx.Frame):
         menuBar = wx.MenuBar()
 
         menuBar.Append(filemenu,"&File") # Adding the "filemenu" to the MenuBar
-        # wx.ID_ABOUT and wx.ID_EXIT are standard ids provided by wxWidgets.
         menuAbout = filemenu.Append(wx.ID_ABOUT, "&About"," Information about this program.")
         menuExit = filemenu.Append(wx.ID_EXIT,"E&xit"," Terminate the program")
         self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
@@ -142,6 +138,7 @@ class MainWindow(wx.Frame):
 
         elif cipher == "Vigenere":
             self.set_to_vigenere()
+
         elif cipher == "One Time Pad":
             self.setToOneTimePad()
         elif cipher == "Hill":

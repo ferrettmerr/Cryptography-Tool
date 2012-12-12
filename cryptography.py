@@ -1,4 +1,4 @@
-def shift(message, shift, decrypt = False, alpha = 'abcdefghijklmnopqrstuvwxyz'):
+def shift(message, shift, decrypt = False, alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
     
     shift %= len(alpha)
     if decrypt:
@@ -7,18 +7,18 @@ def shift(message, shift, decrypt = False, alpha = 'abcdefghijklmnopqrstuvwxyz')
     outstring = ''
 
     for a in message:
-        if trans.has_key(a.lower()):
-            if a.islower():
+        if trans.has_key(a):
+            if a:
                 outstring += trans[a]
             else:
-                outstring += trans[a.lower()].upper()
+                outstring += trans[a].upper()
         else:
             outstring += a
 
     return outstring
 
-def affine(message, a, b, decrypt = False, alpha = 'abcdefghijklmnopqrstuvwxyz'):
-    alpha = alpha.upper()
+def affine(message, a, b, decrypt = False, alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
+
     VALUES = dict(zip(alpha, range(len(alpha))))
     RVALUES = dict(zip(range(len(alpha)), alpha))
     text = ""
@@ -67,7 +67,7 @@ def inverse_key(cipher):
         inverse.append(cipher.index(position)+1)
     return inverse
 
-def vigenere(message, key, decrypt = False, strip = False):
+def vigenere(message, key, decrypt = False):
     """
     vigenere(message, key, decrypt = False, strip = False)
     
@@ -75,12 +75,10 @@ def vigenere(message, key, decrypt = False, strip = False):
     If strip is True, all non-alphabetic characters are stripped from the
     message, and it is converted to lower case.
     """
-    if strip:    # Strip whitespace and punctuation
-        message = filter(str.isalpha, message).lower()
 
-    key = filter(str.isalpha, key).lower()
+    key = filter(str.isalpha, key)
 
-    alpha = 'abcdefghijklmnopqrstuvwxyz'
+    alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     tonum = dict([(alpha[i], i) for i in range(len(alpha))])
 
     # Construct the tabula recta
