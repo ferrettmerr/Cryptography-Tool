@@ -86,7 +86,7 @@ class MainWindow(wx.Frame):
 
 
         # Reset encrypted text field only, incase same message wants to be used for different encryptions
-        # self.encrypted.SetValue("")
+        self.encrypted.SetValue("")
         input_object = event.GetEventObject()
         cipher = input_object.GetValue()
         # cipher = self.combo_box.GetValue() #another way to do this, might want to clean up later
@@ -142,9 +142,6 @@ class MainWindow(wx.Frame):
         elif cipher == "Vigenere":
 
             key = self.keyword.GetValue().encode('ascii','ignore').upper().replace(' ', '')
-
-            print key
-            print plain_text
 
             encrypted_text = vigenere(plain_text, key, False)
             self.encrypted.SetValue(encrypted_text)

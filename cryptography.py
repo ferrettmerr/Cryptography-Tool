@@ -98,7 +98,7 @@ def vigenere(message, key, decrypt = False):
     out = ''
     for i in range(len(message)):
         if message[i].isalpha():
-            letter = lookup[message[i].lower()][key[i % len(key)]]
+            letter = lookup[message[i]][key[i % len(key)]]
             if message[i].isupper():
                 out += letter.upper()
             else:
@@ -118,10 +118,10 @@ def hill(message, key, decrypt = False):
     if n * n != len(key):
         raise Exception("Invalid key length")
     
-    message = filter(str.isalpha, message).lower()
+    message = filter(str.isalpha, message).upper()
     
     #alpha = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ .,?!:;()1234567890'
-    alpha = 'abcdefghijklmnopqrstuvwxyz'
+    alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     tonum = dict([(alpha[i], i * 1.) for i in range(len(alpha))])
 
     # Construct our key matrix
