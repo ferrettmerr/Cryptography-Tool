@@ -18,7 +18,8 @@ class MainWindow(wx.Frame):
         self.init_gui()
         self.init_menu()
         self.Show(True)
-
+        self.combo_box.SetStringSelection('Shift')
+        self.set_to_shift()
 
     def init_gui(self):
         self.panel = wx.Panel(self)
@@ -41,7 +42,7 @@ class MainWindow(wx.Frame):
 
         # Encrypt and Decrypt Buttons
         self.encrypt_btn = wx.Button(self.panel, 1, '>>', pos=(self.width/2 -25,175),size=(50, 100))
-        self.decrypt_btn = wx.Button(self.panel, 1, '<<', pos=(self.width/2 -25,220),size=(50, 100))
+        self.decrypt_btn = wx.Button(self.panel, 2, '<<', pos=(self.width/2 -25,220),size=(50, 100))
    
         # self.Bind(wx.EVT_BUTTON, self.OnClose, id=1)
 
@@ -135,14 +136,14 @@ class MainWindow(wx.Frame):
         self.widgetSizer.Add(b_txt, 0, wx.ALL, 5)
 
 
-        self.Bind(wx.EVT_BUTTON, self.decrypt_encrypt_affine, self.encrypt_btn)#If not bound to button, will effect all buttons
+        self.Bind(wx.EVT_BUTTON, self.encrypt_affine, self.encrypt_btn)#If not bound to button, will effect all buttons
         self.Bind(wx.EVT_BUTTON, self.decrypt_affine, self.decrypt_btn)
         # self.encrypt_btn.Bind(wx.EVT_BUTTON, self.encrypt_decrypt_affine(a, b, True))
         # self.decrypt_btn.Bind(wx.EVT_BUTTON, self.encrypt_decrypt_affine(a, b, False))
 
 
-    def decrypt_encrypt_affine(self, event):
-
+    def encrypt_affine(self, event):
+        self.decrypted.SetValue("Yay!")
         # TODO CLEAN UP - REALLY SLOPPY
         a = int(self.a.GetValue())
         b = int(self.b.GetValue())
@@ -173,14 +174,6 @@ class MainWindow(wx.Frame):
         # print decryption
 
         self.decrypted.SetValue(decryption)
-
-
-
-
-        
-
-
-
 
     def set_to_substitution(self):
         # need a-z mapping, use dictionary
