@@ -104,6 +104,7 @@ def vigenere(message, key, decrypt = False):
 
 def one_time_pad(message, key, decrypt = False):
     return
+    
 def hill(message, key, decrypt = False):
     
     from math import sqrt

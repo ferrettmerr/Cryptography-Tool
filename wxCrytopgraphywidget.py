@@ -8,6 +8,13 @@ from cryptography import *
 # TODO remove, used for testing to print dictionarys
 from pprint import pprint
 
+"""
+TODO list
+
+add exceptions for cryptography
+Handle exceptiosn in gui
+
+"""
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title):
@@ -199,90 +206,37 @@ class MainWindow(wx.Frame):
 
     def set_to_substitution(self):
         # need a-z mapping, use dictionary
-        self.dictionary = dict.fromkeys(string.ascii_uppercase, 0)#init each value to 0
-
         pos_x = 10
         pos_y = 50
-        index = 0
 
-        count_of_btns = 0
 
+        self.dictionary = dict()
         remaining_values = list(string.ascii_uppercase)#map(chr, range(65, 91)) also works
         remaining_values.sort()
-        # self.sub_combo_boxes = []
 
         # layout and crete alphabet
         for key in remaining_values:
             letter_label = wx.StaticText(self.panel,label=key+":", pos=(pos_x, pos_y))
-            pos_x += 20
+            pos_x += 20 
             letter_btn = wx.ComboBox(self.panel, -1, pos=(pos_x,pos_y), size=(50, -1),choices=remaining_values, style=wx.CB_READONLY, name=key)
             letter_btn.Bind(wx.EVT_COMBOBOX, self.on_letter_choice)
 
-            # self.sub_combo_boxes.append(letter_btn)
             pos_x += 55
-            index += 1
-            count_of_btns += 2
-            if index > len(self.dictionary)/3:
-                pos_x =10
+            if pos_x > 650:
+                pos_x = 10
                 pos_y += 20
-                index = 0
-
+                        
             self.widgetSizer.Add(letter_label, 0, wx.ALL, 5)
             self.widgetSizer.Add(letter_btn, 0, wx.ALL, 5)
 
-
-
-
-
-            # create label + input field
-            # add to widgetsizer & numberOfBtns
-            # if half way create new row (use 2 rows)
-
-        # self.key.SetLabel("Substitution")
-        # add validation method and display somehow
-
     def on_letter_choice(self, e):
-
 
         event_object = e.GetEventObject()
         value = event_object.GetValue()
-        self.dictionary[event_object.GetName()] = value
-        pprint(self.dictionary)
-
-        # get index for later use
-        # char_index = self.remaining_values.index(value.GetValue())
-        # self.dictionary[value.GetName()] = value.GetValue();
-        # TODO get previouse value, add it back to list
-
-        # remove  global values selected
-        # self.dictionary = dict.fromkeys(string.ascii_uppercase, 0)#init each value to 0
-        # self.remaining_values.remove(value.GetValue())
-
-        # update every other comboxbox
-        # children = self.widgetSizer.GetChildren()
- 
-        # for child in children:
-        #     widget = child.GetWindow()
-            # if isinstance(widget, wx.ComboBox):d
-                # for letter in dictionary.keys():
-                #     if value.GetValue() == letter:
-                #         dictionary[letter] += 1 
-                #     if dictionary[letter] >0:
-                #         value.SetValue(0)
-
-                # widget.GetValue()
-                # print widget.GetString(-1)
-                # if widget != value:
-                    # widget.Clear()
-                    # for char in self.remaining_values:
-                    #     widget.Append(char)
-
-        # # remove selected letter from every other combo box
-        # for combo_box in self.sub_combo_boxes:
-        #     if combo_box != value:
-        #             combo_box.Clear()
-        #             for char in self.remaining_values:
-        #                 combo_box.Append(char)
+        if (value in self.dictionary):
+            self.dictionary[value].SetStringSelection('')
+        
+        self.dictionary[value] = event_object
 
 
 
