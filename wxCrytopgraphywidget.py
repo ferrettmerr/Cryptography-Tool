@@ -3,7 +3,8 @@ import os
 import wx
 import string
 import affine
-import cryptography
+import re
+from cryptography import *
 
 # TODO remove, used for testing to print dictionarys
 from pprint import pprint
@@ -107,25 +108,72 @@ class MainWindow(wx.Frame):
     def encrypt_pressed(self, event):
         cipher = self.combo_box.GetValue()
 
-        plain_text = self.encrypted.GetValue()
+        plain_text = self.decrypted.GetValue().encode('ascii','ignore').upper().replace(' ', '')
+
+        pattern = re.compile(r'\s+')
+        plain_text = re.sub(pattern, '', plain_text)
 
         if cipher == "Shift":
-            cipher_text = shift(plain_text, self.shift_combo.GetValue())
-            self.decrypted.SetValue(cipher_text)
+            cipher_text = shift(plain_text, int(self.shift_combo.GetValue()))
+            self.encrypted.SetValue(cipher_text)
+        
         elif cipher == "Affine":
-            self.set_to_affine()
+            a = int(self.a.GetValue())
+            b = int(self.b.GetValue())
+
+            encrypted_text = affine(plain_text, a, b)
+            self.encrypted.SetValue(encrypted_text)
+        
         elif cipher == "Substitution":
             self.set_to_substitution()
+        
         elif cipher == "Permutation":
-            self.set_to_permutation()
+            cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
+
+            encrypted_text = permutation(plain_text, cipher_text)
+            self.encrypted.SetValue(encrypted_text)
+
         elif cipher == "Vigenere":
             self.set_to_vigenere()
         elif cipher == "One Time Pad":
             self.setToOneTimePad()
         elif cipher == "Hill":
             self.set_to_hill()
+
     def decrypt_pressed(self, event):
-        return
+        cipher = self.combo_box.GetValue()
+
+        encrypted_text = self.encrypted.GetValue().encode('ascii','ignore').upper()
+        
+        pattern = re.compile(r'\s+')
+        encrypted_text = re.sub(pattern, '', encrypted_text)
+
+        if cipher == "Shift":
+            plain_text = shift(encrypted_text, int(self.shift_combo.GetValue()), True)
+            self.decrypted.SetValue(plain_text)
+        
+        elif cipher == "Affine":
+            a = int(self.a.GetValue())
+            b = int(self.b.GetValue())
+
+            plain_text = affine(encrypted_text, a, b, True)
+            self.decrypted.SetValue(plain_text)
+        
+        elif cipher == "Substitution":
+            self.set_to_substitution()
+        elif cipher == "Permutation":
+            cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
+
+            decrypted_text = permutation(encrypted_text, cipher_text, True)
+            self.decrypted.SetValue(decrypted_text)
+        elif cipher == "Vigenere":
+            self.set_to_vigenere()
+
+        elif cipher == "One Time Pad":
+            self.setToOneTimePad()
+
+        elif cipher == "Hill":
+            self.set_to_hill()
 
     def set_to_shift(self):
         shift_txt = wx.StaticText(self.panel, label="Right shift by:", pos=(self.width/2-140, 50))
@@ -135,14 +183,6 @@ class MainWindow(wx.Frame):
 
         self.widgetSizer.Add(self.shift_combo, 0, wx.ALL, 5)
         self.widgetSizer.Add(shift_txt, 0, wx.ALL, 5)
-
-        # TODO Set button listners, last argument is method with input: def methodName(self,event):
-        # self.encrypt_btn.Bind(wx.EVT_BUTTON, self.shiftEncrypt)
-        # self.decrypt_btn.Bind(wx.EVT_BUTTON, self.shiftEncrypt)
-
-        # self.encrypted.SetValue("Encrypted message")
-        # self.decrypted.SetValue("Decrypted message")
-
 
     def set_to_affine(self):
         a_txt = wx.StaticText(self.panel, label="A:", pos=(self.width/2 - 100, 52))
@@ -159,46 +199,6 @@ class MainWindow(wx.Frame):
         self.widgetSizer.Add(self.b, 0, wx.ALL, 5)
         self.widgetSizer.Add(a_txt, 0, wx.ALL, 5)
         self.widgetSizer.Add(b_txt, 0, wx.ALL, 5)
-
-
-        # self.Bind(wx.EVT_BUTTON, self.encrypt_affine, self.encrypt_btn)#If not bound to button, will effect all buttons
-        # self.Bind(wx.EVT_BUTTON, self.decrypt_affine, self.decrypt_btn)
-        # self.encrypt_btn.Bind(wx.EVT_BUTTON, self.encrypt_decrypt_affine(a, b, True))
-        # self.decrypt_btn.Bind(wx.EVT_BUTTON, self.encrypt_decrypt_affine(a, b, False))
-
-
-    def encrypt_affine(self, event):
-        self.decrypted.SetValue("Yay!")
-        # TODO CLEAN UP - REALLY SLOPPY
-        a = int(self.a.GetValue())
-        b = int(self.b.GetValue())
-        msg = self.decrypted.GetValue().encode('ascii','ignore').upper()#TODO ignore /n and other non ascii chars
-
-
-        # print a
-        # print b
-        # print msg
-
-        encryption = affine.encode_affine(msg, a, b)
-
-        # print encryption
-
-        self.encrypted.SetValue(encryption)
-
-
-
-
-    def decrypt_affine(self, event):
-
-        a = int(self.a.GetValue()) 
-        b = int(self.b.GetValue())
-        msg = self.encrypted.GetValue().encode('ascii','ignore').upper()#TODO ignore /n and other non ascii chars
-
-        decryption = affine.decode_affine(msg, a, b)
-
-        # print decryption
-
-        self.decrypted.SetValue(decryption)
 
     def set_to_substitution(self):
         # need a-z mapping, use dictionary
@@ -290,20 +290,14 @@ class MainWindow(wx.Frame):
 
 
     def set_to_permutation(self):
-        block_size = wx.StaticText(self.panel, label="Size of Blocks:", pos=(self.width/4 -40, 50))
-        description = wx.StaticText(self.panel, label="Enter a size and enter positions of blocks separated by spaces that is the specified size.\n\t\t\t\t\t Example: 1 4 3 2 5 with size = 5", pos=(self.width/8, 75))
+        description = wx.StaticText(self.panel, label="Enter positions of blocks separated by spaces that is the specified size.\n\t\t\t\t\t Example: 1 4 3 2 5", pos=(self.width/8, 75))
 
-        cipher_txt = wx.StaticText(self.panel, label="Cipher:", pos=(self.width/2- 50, 50))
-        block = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,50), size=(50, -1))
-        cipher_input = wx.TextCtrl(self.panel, -1, '',pos=(self.width/2,50), size=(150, -1))
+        cipher_txt = wx.StaticText(self.panel, label="Cipher:", pos=(self.width/2 - 125, 50))
+        self.cipher_text = wx.TextCtrl(self.panel, -1, '',pos=(self.width/2 - 150/2,50), size=(150, -1))
 
-        self.widgetSizer.Add(block_size, 0, wx.ALL, 5)
         self.widgetSizer.Add(description, 0, wx.ALL, 5)
         self.widgetSizer.Add(cipher_txt, 0, wx.ALL, 5)
-        self.widgetSizer.Add(block, 0, wx.ALL, 5)
-        self.widgetSizer.Add(cipher_input, 0, wx.ALL, 5)
-        #TODO parse for only letters and spaces 
-        # self.key.SetLabel("Perumation")
+        self.widgetSizer.Add(self.cipher_text, 0, wx.ALL, 5)
 
     def set_to_vigenere(self):
         keyword_txt = wx.StaticText(self.panel, label="Keyword:", pos=(self.width/3 -65, 50))

@@ -17,9 +17,29 @@ def shift(message, shift, decrypt = False, alpha = 'abcdefghijklmnopqrstuvwxyz')
 
     return outstring
 
-def affine(message, a, b, decrypt = False):
+def affine(message, a, b, decrypt = False, alpha = 'abcdefghijklmnopqrstuvwxyz'):
+    alpha = alpha.upper()
+    VALUES = dict(zip(alpha, range(len(alpha))))
+    RVALUES = dict(zip(range(len(alpha)), alpha))
+    text = ""
+
+    if (decrypt):
+        m = find_coprime(a)
+        text = [ RVALUES[(m * (VALUES[i] - b)) % 26] for i in message ]
+    else:
+        text = [ RVALUES[(a * VALUES[i] + b) % 26] for i in message ]
+
+    return ''.join(text)
+
+def find_coprime(a):
+
+    for i in range(26):
+        if ((i * a) % 26) == 1:
+            return i
+        
+    #Raise an error
+    raise Exception, "The codeword %d has not a coprime, try another" % a
     
-    return "not implemented"
 
 def substitution(message, substitutions, decrypt = False):
     
@@ -32,15 +52,14 @@ def permutation(message, cipher, decrypt = False):
     if decrypt:
         cipher = inverse_key(cipher)
 
-    for pad in range(0, len(plaintext)%len(cipher)*-1%len(cipher)):
-        plaintext += "X"
+    for pad in range(0, len(message) % len(cipher) * - 1 % len(cipher)):
+        message += "X"
     
-    for offset in range(0, len(plaintext), len(cipher)):
-        for element in [a-1 for a in cipher]:
-            ciphertext += plaintext[offset+element]
-        ciphertext += " "
+    for offset in range(0, len(message), len(cipher)):
+        for element in cipher:
+            ciphertext = ciphertext + message[offset + element -1]
     
-    return ciphertext[:-1]
+    return ciphertext
 
 def inverse_key(cipher):
     inverse = []
