@@ -4,7 +4,7 @@ import wx
 import string
 import re
 from cryptography import *
-
+from copy import copy
 # TODO remove, used for testing to print dictionarys
 from pprint import pprint
 
@@ -128,8 +128,11 @@ class MainWindow(wx.Frame):
             self.encrypted.SetValue(encrypted_text)
         
         elif cipher == "Substitution":
-            self.set_to_substitution()
-        
+            cipher_dict = dict()
+            for k,v in self.dictionary.iteritems():
+                cipher_dict[v.GetName()] = k;
+            encrypted_text = substitution(plain_text, cipher_dict)
+            self.encrypted.SetValue(encrypted_text)
         elif cipher == "Permutation":
             cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
 
@@ -171,7 +174,13 @@ class MainWindow(wx.Frame):
             self.decrypted.SetValue(plain_text)
         
         elif cipher == "Substitution":
-            self.set_to_substitution()
+            cipher_dict = dict()
+            for k,v in self.dictionary.iteritems():
+                cipher_dict[v.GetName()] = k;
+            
+            plain_text = substitution(encrypted_text, cipher_dict, True)
+            self.decrypted.SetValue(plain_text)
+
         elif cipher == "Permutation":
             cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
 
@@ -215,7 +224,6 @@ class MainWindow(wx.Frame):
         # need a-z mapping, use dictionary
         pos_x = 10
         pos_y = 50
-
 
         self.dictionary = dict()
         remaining_values = list(string.ascii_uppercase)#map(chr, range(65, 91)) also works
