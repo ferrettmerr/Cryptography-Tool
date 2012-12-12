@@ -43,7 +43,12 @@ def find_coprime(a):
 
 def substitution(message, substitutions, decrypt = False):
     
-    return "not implemented"
+    new_message = ""
+    for char in message:
+        new_message += substitutions[char]
+    
+
+    return new_message
 
 def permutation(message, cipher, decrypt = False):
     message = "".join(message.split(" ")).upper()
