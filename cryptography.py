@@ -25,9 +25,28 @@ def substitution(message, substitutions, decrypt = False):
     
     return "not implemented"
 
-def permutation(message, block_size, swaps, decrypt = False):
+def permutation(message, cipher, decrypt = False):
+    message = "".join(message.split(" ")).upper()
+    ciphertext = ""
     
-    return "not implemented"
+    if decrypt:
+        cipher = inverse_key(cipher)
+
+    for pad in range(0, len(plaintext)%len(cipher)*-1%len(cipher)):
+        plaintext += "X"
+    
+    for offset in range(0, len(plaintext), len(cipher)):
+        for element in [a-1 for a in cipher]:
+            ciphertext += plaintext[offset+element]
+        ciphertext += " "
+    
+    return ciphertext[:-1]
+
+def inverse_key(cipher):
+    inverse = []
+    for position in range(min(cipher),max(cipher)+1,1):
+        inverse.append(cipher.index(position)+1)
+    return inverse
 
 def vigenere(message, key, decrypt = False, strip = False):
     """
@@ -67,7 +86,7 @@ def vigenere(message, key, decrypt = False, strip = False):
     return out
 
 def one_time_pad(message, key, decrypt = False):
-    
+    return
 def hill(message, key, decrypt = False):
     
     from math import sqrt

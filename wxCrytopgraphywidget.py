@@ -3,7 +3,7 @@ import os
 import wx
 import string
 import affine
-# import Permutation
+import cryptography
 
 # TODO remove, used for testing to print dictionarys
 from pprint import pprint
@@ -48,6 +48,8 @@ class MainWindow(wx.Frame):
 
         # Set events.
         self.Bind(wx.EVT_COMBOBOX, self.OnSelect, self.combo_box)#If not bound to button, will effect all buttons
+        self.Bind(wx.EVT_BUTTON, self.encrypt_pressed, self.encrypt_btn)#If not bound to button, will effect all buttons
+        self.Bind(wx.EVT_BUTTON, self.decrypt_pressed, self.decrypt_btn)
 
     def init_menu(self):
         filemenu= wx.Menu()
@@ -102,13 +104,36 @@ class MainWindow(wx.Frame):
         elif cipher == "Hill":
             self.set_to_hill()
 
+    def encrypt_pressed(self, event):
+        cipher = self.combo_box.GetValue()
+
+        plain_text = self.encrypted.GetValue()
+
+        if cipher == "Shift":
+            cipher_text = shift(plain_text, self.shift_combo.GetValue())
+            self.decrypted.SetValue(cipher_text)
+        elif cipher == "Affine":
+            self.set_to_affine()
+        elif cipher == "Substitution":
+            self.set_to_substitution()
+        elif cipher == "Permutation":
+            self.set_to_permutation()
+        elif cipher == "Vigenere":
+            self.set_to_vigenere()
+        elif cipher == "One Time Pad":
+            self.setToOneTimePad()
+        elif cipher == "Hill":
+            self.set_to_hill()
+    def decrypt_pressed(self, event):
+        return
+
     def set_to_shift(self):
         shift_txt = wx.StaticText(self.panel, label="Right shift by:", pos=(self.width/2-140, 50))
         
         shiftAmounts = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25']
-        key_button = wx.ComboBox(self.panel, -1, pos=(self.width/2 - 40, 50), size=(80, -1), choices=shiftAmounts, style=wx.CB_READONLY)
+        self.shift_combo = wx.ComboBox(self.panel, -1, pos=(self.width/2 - 40, 50), size=(80, -1), choices=shiftAmounts, style=wx.CB_READONLY)
 
-        self.widgetSizer.Add(key_button, 0, wx.ALL, 5)
+        self.widgetSizer.Add(self.shift_combo, 0, wx.ALL, 5)
         self.widgetSizer.Add(shift_txt, 0, wx.ALL, 5)
 
         # TODO Set button listners, last argument is method with input: def methodName(self,event):
@@ -136,8 +161,8 @@ class MainWindow(wx.Frame):
         self.widgetSizer.Add(b_txt, 0, wx.ALL, 5)
 
 
-        self.Bind(wx.EVT_BUTTON, self.encrypt_affine, self.encrypt_btn)#If not bound to button, will effect all buttons
-        self.Bind(wx.EVT_BUTTON, self.decrypt_affine, self.decrypt_btn)
+        # self.Bind(wx.EVT_BUTTON, self.encrypt_affine, self.encrypt_btn)#If not bound to button, will effect all buttons
+        # self.Bind(wx.EVT_BUTTON, self.decrypt_affine, self.decrypt_btn)
         # self.encrypt_btn.Bind(wx.EVT_BUTTON, self.encrypt_decrypt_affine(a, b, True))
         # self.decrypt_btn.Bind(wx.EVT_BUTTON, self.encrypt_decrypt_affine(a, b, False))
 
