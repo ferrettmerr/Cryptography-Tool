@@ -122,7 +122,7 @@ class MainWindow(wx.Frame):
         
         elif cipher == "Affine":
             a = int(self.a.GetValue())
-            b = int(self.b.GetValue())
+            b = int(self.b.GetValue()) 
 
             encrypted_text = affine(plain_text, a, b)
             self.encrypted.SetValue(encrypted_text)
@@ -137,7 +137,14 @@ class MainWindow(wx.Frame):
             self.encrypted.SetValue(encrypted_text)
 
         elif cipher == "Vigenere":
-            self.set_to_vigenere()
+
+            key = self.keyword.GetValue().encode('ascii','ignore').upper().replace(' ', '')
+
+            print key
+            print plain_text
+
+            encrypted_text = vigenere(plain_text, key, False)
+            self.encrypted.SetValue(encrypted_text)
 
         elif cipher == "One Time Pad":
             self.setToOneTimePad()
@@ -171,8 +178,8 @@ class MainWindow(wx.Frame):
             decrypted_text = permutation(encrypted_text, cipher_text, True)
             self.decrypted.SetValue(decrypted_text)
         elif cipher == "Vigenere":
-            self.set_to_vigenere()
-
+            decrypted_text = vigenere(encrypted_text, self.keyword.GetValue().encode('ascii','ignore').upper(), True)
+            self.decrypted.SetValue(decrypted_text)
         elif cipher == "One Time Pad":
             self.setToOneTimePad()
 
@@ -256,11 +263,11 @@ class MainWindow(wx.Frame):
     def set_to_vigenere(self):
         keyword_txt = wx.StaticText(self.panel, label="Keyword:", pos=(self.width/3 -65, 50))
         keyword_description = wx.StaticText(self.panel, label="Pick a keyword that is between 3-6 letters.", pos=(self.width/3 - 10, 75))
-        keyword = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,50), size=(250, -1))#TODO parse for only ascii chars
+        self.keyword = wx.TextCtrl(self.panel, 9, '',pos=(self.width/3,50), size=(250, -1))#TODO parse for only ascii chars
 
         self.widgetSizer.Add(keyword_txt, 0, wx.ALL, 5)
         self.widgetSizer.Add(keyword_description, 0, wx.ALL, 5)
-        self.widgetSizer.Add(keyword, 0, wx.ALL, 5)
+        self.widgetSizer.Add(self.keyword, 0, wx.ALL, 5)
      
 
     def setToOneTimePad(self):        
