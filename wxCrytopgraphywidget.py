@@ -128,11 +128,10 @@ class MainWindow(wx.Frame):
             self.encrypted.SetValue(encrypted_text)
         
         elif cipher == "Substitution":
-            cipher = copy(self.dictionary)
-            for k,v in cipher.iteritems():
-                v = v.GetValue();
-            
-            encrypted_text = substitution(plain_text, cipher)
+            cipher_dict = dict()
+            for k,v in self.dictionary.iteritems():
+                cipher_dict[v.GetName()] = k;
+            encrypted_text = substitution(plain_text, cipher_dict)
             self.encrypted.SetValue(encrypted_text)
         elif cipher == "Permutation":
             cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
@@ -169,12 +168,11 @@ class MainWindow(wx.Frame):
         
         elif cipher == "Substitution":
             cipher_dict = dict()
-            for k in dictionary.iterkeys():
-                cipher_dict[k] = dictionary[k].GetValue()
-            for key, value in dict.items(cipher_dict):
-                self.encrypted.SetValue(self.encrypted.GetValue + key + ", " + value + "\r\n")
-            # plain_text = substitution(encrypted_text, cipher_dict, True)
-            # self.decrypted.SetValue(plain_text)
+            for k,v in self.dictionary.iteritems():
+                cipher_dict[v.GetName()] = k;
+            
+            plain_text = substitution(encrypted_text, cipher_dict, True)
+            self.decrypted.SetValue(plain_text)
 
         elif cipher == "Permutation":
             cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]

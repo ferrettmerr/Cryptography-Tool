@@ -45,7 +45,8 @@ def substitution(message, substitutions, decrypt = False):
     
     new_message = ""
     for char in message:
-        new_message += substitutions[char]
+        if (char in substitutions):
+            new_message += substitutions[char]
     
 
     return new_message
