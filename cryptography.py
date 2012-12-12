@@ -114,9 +114,6 @@ def one_time_pad(message, key, decrypt = False):
     endchar = 'Z'
     modular = 26
 
-    if len(key) < len(message):
-        return "ERROR: KEY NOT LONG ENOUGH"
-
     if not decrypt:  
         #encyrpt  
         ret = ""

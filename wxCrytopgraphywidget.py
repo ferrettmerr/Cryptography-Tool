@@ -149,6 +149,10 @@ class MainWindow(wx.Frame):
         elif cipher == "One Time Pad":
             # self.setToOneTimePad()
             long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
+
+            if len(long_key) < len(plain_text):
+                return
+
             encrypted_text = one_time_pad(plain_text, long_key, False)
             self.encrypted.SetValue(encrypted_text)
 
@@ -192,6 +196,9 @@ class MainWindow(wx.Frame):
             self.decrypted.SetValue(decrypted_text)
         elif cipher == "One Time Pad":
             long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
+
+            if len(long_key) < len(encrypted_text):
+                return
             decrypted_text = one_time_pad(encrypted_text, long_key, True)
             self.decrypted.SetValue(decrypted_text)
 
