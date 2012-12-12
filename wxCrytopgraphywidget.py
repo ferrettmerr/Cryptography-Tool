@@ -216,9 +216,12 @@ class MainWindow(wx.Frame):
         self.dictionary = dict()
         remaining_values = list(string.ascii_uppercase)#map(chr, range(65, 91)) also works
         remaining_values.sort()
+        remaining_values = [' '] + remaining_values
 
         # layout and crete alphabet
         for key in remaining_values:
+            if key == ' ':
+                continue
             letter_label = wx.StaticText(self.panel,label=key+":", pos=(pos_x, pos_y))
             pos_x += 20 
             letter_btn = wx.ComboBox(self.panel, -1, pos=(pos_x,pos_y), size=(50, -1),choices=remaining_values, style=wx.CB_READONLY, name=key)
@@ -237,7 +240,7 @@ class MainWindow(wx.Frame):
         event_object = e.GetEventObject()
         value = event_object.GetValue()
         if (value in self.dictionary):
-            self.dictionary[value].SetStringSelection('')
+            self.dictionary[value].SetStringSelection(' ')
         
         self.dictionary[value] = event_object
 
