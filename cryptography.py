@@ -135,48 +135,24 @@ def one_time_pad(message, key, decrypt = False):
             ret += convertedchar
         return ret
     
-def hill(message, key, decrypt = False):
-    
-    from math import sqrt
-    n = int(sqrt(len(key)))
-    if n * n != len(key):
-        raise Exception("Invalid key length")
-    
-    message = filter(str.isalpha, message).upper()
-    
-    #alpha = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ .,?!:;()1234567890'
-    alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    tonum = dict([(alpha[i], i * 1.) for i in range(len(alpha))])
+def hill(message, matrix, encryption = False):
 
-    # Construct our key matrix
-    keylist = []
-    for a in key:
-        keylist.append(tonum[a])
-    keymatrix, inverse = [], []
-    for i in range(n):
-        keymatrix.append(keylist[i * n:i * n + n])
-        inverse.append(keylist[i * n:i * n + n])
-    
-    # Make sure the key matrix is invertible, use the inverse if decrypting
-    try:
-        #inverse = matrix_invert(inverse)
-        pass
-    except Exception:
-        raise Exception("Uninvertible key matrix")
-    if decrypt:
-        raise Exception("Decryption not supported.") # To remove once we have an inversion function
-        keymatrix = inverse
+    import utils
 
-    # Pad the message with spaces^WAs if necessary
-    if len(message) % n > 0:
-        message += ' ' * (n - (len(message) % n))
-
-    # Main loop
-    from string import join
-    out = ''
-    for i in range(len(message) / n):
-        lst = [[tonum[a]] for a in message[i * n:i * n + n]]
-        lst = [[sum(i * j for i, j in zip(row, col)) for col in zip(*lst)] for row in keymatrix]
-        out += ''.join([alpha[int(lst[j][0]) % len(alpha)] for j in range(len(lst))])
-    
-    return out
+    if not utils.invertible(matrix):
+        # The matrix should be invertible.
+        return "Non invertible matrix"
+    if len(message) % 2 != 0:
+        message = message + 'X'
+    couple = [list(message[i*2:(i*2)+2]) for i in range(0, len(message)/2)]
+    result = [i[:] for i in couple]
+    if not encryption:
+        # To decrypt, just need to inverse the matrix.
+        matrix = utils.inverse_matrix(matrix)
+    for i, c in enumerate(couple):
+        if c[0].isalpha() and c[1].isalpha():
+            result[i][0] = chr(((ord(c[0])-65) * matrix[0][0] + \
+                                    (ord(c[1])-65) * matrix[0][1]) % 26 + 65)
+            result[i][1] = chr(((ord(c[0])-65) * matrix[1][0] + \
+                                    (ord(c[1])-65) * matrix[1][1]) % 26 + 65)
+    return "".join(["".join(i) for i in result])

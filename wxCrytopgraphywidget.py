@@ -3,6 +3,7 @@ import os
 import wx
 import string
 import re
+import json
 from cryptography import *
 from copy import copy
 # TODO remove, used for testing to print dictionarys
@@ -147,7 +148,7 @@ class MainWindow(wx.Frame):
             self.encrypted.SetValue(encrypted_text)
 
         elif cipher == "One Time Pad":
-            # self.setToOneTimePad()
+
             long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
 
             if len(long_key) < len(plain_text):
@@ -157,7 +158,14 @@ class MainWindow(wx.Frame):
             self.encrypted.SetValue(encrypted_text)
 
         elif cipher == "Hill":
-            self.set_to_hill()
+
+            matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
+
+            json_value = json.loads(matrix)
+
+            encrypted_text = hill(plain_text, json_value, False)
+            self.encrypted.SetValue(encrypted_text)
+
 
     def decrypt_pressed(self, event):
         cipher = self.combo_box.GetValue()
@@ -203,7 +211,13 @@ class MainWindow(wx.Frame):
             self.decrypted.SetValue(decrypted_text)
 
         elif cipher == "Hill":
-            self.set_to_hill()
+
+            matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
+
+            json_value = json.loads(matrix)
+
+            decrypted_text = hill(encrypted_text, json_value, True)
+            self.decrypted.SetValue(decrypted_text)
 
     def set_to_shift(self):
         shift_txt = wx.StaticText(self.panel, label="Right shift by:", pos=(self.width/2-140, 50))
@@ -299,13 +313,13 @@ class MainWindow(wx.Frame):
 
     def set_to_hill(self):
         matrix_txt = wx.StaticText(self.panel, label="Matrix:", pos=(self.width/3 -50, 50))
-        description_txt = wx.StaticText(self.panel, label="Enter a matrix that is in the format {[5, 9],[11, 8]} with values modulos of 25.", pos=(self.width/6, 75))
-        matrix = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,50), size=(250, -1))#TODO parse for only ascii chars
+        description_txt = wx.StaticText(self.panel, label="Enter a matrix that is in the format [[11, 3],[8, 7]] with values modulos of 25.", pos=(self.width/6, 75))
+        self.matrix = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,50), size=(250, -1))#TODO parse for only ascii chars
 
         self.widgetSizer.Add(matrix_txt, 0, wx.ALL, 5)
         self.widgetSizer.Add(description_txt, 0, wx.ALL, 5)
-        self.widgetSizer.Add(matrix, 0, wx.ALL, 5)
-        # self.key.SetLabel("Hill")
+        self.widgetSizer.Add(self.matrix, 0, wx.ALL, 5)
+
 
 
 
