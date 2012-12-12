@@ -147,7 +147,11 @@ class MainWindow(wx.Frame):
             self.encrypted.SetValue(encrypted_text)
 
         elif cipher == "One Time Pad":
-            self.setToOneTimePad()
+            # self.setToOneTimePad()
+            long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
+            encrypted_text = one_time_pad(plain_text, long_key, False)
+            self.encrypted.SetValue(encrypted_text)
+
         elif cipher == "Hill":
             self.set_to_hill()
 
@@ -187,7 +191,9 @@ class MainWindow(wx.Frame):
             decrypted_text = vigenere(encrypted_text, self.keyword.GetValue().encode('ascii','ignore').upper(), True)
             self.decrypted.SetValue(decrypted_text)
         elif cipher == "One Time Pad":
-            self.setToOneTimePad()
+            long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
+            decrypted_text = one_time_pad(encrypted_text, long_key, True)
+            self.decrypted.SetValue(decrypted_text)
 
         elif cipher == "Hill":
             self.set_to_hill()
@@ -278,11 +284,11 @@ class MainWindow(wx.Frame):
     def setToOneTimePad(self):        
         key_phase_txt = wx.StaticText(self.panel, label="Key phase:", pos=(self.width/3 -70, 50))
         description_txt = wx.StaticText(self.panel, label="The key phase has to be just as long as the decrypted message or longer.", pos=(self.width/6, 75))
-        keyphase = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,50), size=(250, -1))#TODO parse for only ascii chars and limit messsage
+        self.keyphase = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,50), size=(250, -1))#TODO parse for only ascii chars and limit messsage
 
         self.widgetSizer.Add(key_phase_txt, 0, wx.ALL, 5)
         self.widgetSizer.Add(description_txt, 0, wx.ALL, 5)
-        self.widgetSizer.Add(keyphase, 0, wx.ALL, 5)
+        self.widgetSizer.Add(self.keyphase, 0, wx.ALL, 5)
 
     def set_to_hill(self):
         matrix_txt = wx.StaticText(self.panel, label="Matrix:", pos=(self.width/3 -50, 50))

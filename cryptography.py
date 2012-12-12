@@ -109,7 +109,34 @@ def vigenere(message, key, decrypt = False):
     return out
 
 def one_time_pad(message, key, decrypt = False):
-    return
+
+    startchar = 'A'
+    endchar = 'Z'
+    modular = 26
+
+    if len(key) < len(message):
+        return "ERROR: KEY NOT LONG ENOUGH"
+
+    if not decrypt:  
+        #encyrpt  
+        ret = ""
+        for i in range(len(message)):
+            messagechar = ord(message[i]) - ord(startchar)
+            keychar = ord(key[i]) - ord(startchar)
+            calculatedchar = (messagechar + keychar) % modular
+            convertedchar = chr(calculatedchar + ord(startchar))
+            ret += convertedchar
+        return ret
+    else:
+        #decrypt
+        ret = ""
+        for i in range(len(message)):
+            messagechar = ord(message[i]) - ord(startchar)
+            keychar = ord(key[i]) - ord(startchar)
+            calculatedchar = (messagechar - keychar) % modular
+            convertedchar = chr(calculatedchar + ord(startchar))
+            ret += convertedchar
+        return ret
     
 def hill(message, key, decrypt = False):
     
