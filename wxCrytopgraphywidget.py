@@ -301,8 +301,6 @@ class MainWindow(wx.Frame):
         self.a = wx.ComboBox(self.panel, -1,value=aValues[0], pos=(self.width/2 - 86, self.cipher_y), size=(75, -1), choices=aValues, style=wx.CB_READONLY)
         self.b = wx.ComboBox(self.panel, -1,value=bValues[0], pos=(self.width/2 + 14, self.cipher_y), size=(75, -1), choices=bValues, style=wx.CB_READONLY)
 
-        self.cipher_info.SetLabel("The Affine Cipher. \r\n More info: http://en.wikipedia.org/wiki/Affine_cipher")
-
         self.widgetSizer.Add(self.a, 0, wx.ALL, 5)
         self.widgetSizer.Add(self.b, 0, wx.ALL, 5)
         self.widgetSizer.Add(a_txt, 0, wx.ALL, 5)
