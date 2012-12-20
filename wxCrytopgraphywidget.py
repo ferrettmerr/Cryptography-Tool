@@ -163,7 +163,7 @@ class MainWindow(wx.Frame):
                 self.encrypted.SetValue(encrypted_text)
             except Exception ,e:
                 dlg = wx.MessageDialog(self,
-                    str(e),
+                   "Input is not valid. Please ensure it is in the correct format.",
                     "Error", wx.OK)
                 result = dlg.ShowModal()
 
@@ -244,7 +244,7 @@ class MainWindow(wx.Frame):
                 self.decrypted.SetValue(decrypted_text)
             except Exception ,e:
                 dlg = wx.MessageDialog(self,
-                    str(e),
+                    "Input is not valid. Please ensure it is in the correct format.",
                     "Error", wx.OK)
                 result = dlg.ShowModal()
         elif cipher == "Vigenere":
