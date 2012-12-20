@@ -1,3 +1,5 @@
+import wx
+
 def shift(message, shift, decrypt = False, alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
     
     shift %= len(alpha)
@@ -47,6 +49,8 @@ def substitution(message, substitutions, decrypt = False):
     for char in message:
         if (char in substitutions):
             new_message += substitutions[char]
+        else:
+            raise Exception, "Inputted Character(s) need to be set."
     
 
     return new_message
@@ -54,16 +58,19 @@ def substitution(message, substitutions, decrypt = False):
 def permutation(message, cipher, decrypt = False):
     message = "".join(message.split(" ")).upper()
     ciphertext = ""
-    
-    if decrypt:
-        cipher = inverse_key(cipher)
+    try:
+        if decrypt:
+            cipher = inverse_key(cipher)
 
-    for pad in range(0, len(message) % len(cipher) * - 1 % len(cipher)):
-        message += "X"
+        for pad in range(0, len(message) % len(cipher) * - 1 % len(cipher)):
+            message += "X"
     
-    for offset in range(0, len(message), len(cipher)):
-        for element in cipher:
-            ciphertext = ciphertext + message[offset + element -1]
+        for offset in range(0, len(message), len(cipher)):
+            for element in cipher:
+                ciphertext = ciphertext + message[offset + element -1]
+
+    except:
+        raise Exception, "Input is not valid. Please make sure that inputted permutation array is in the correct format."
     
     return ciphertext
 
@@ -141,18 +148,23 @@ def hill(message, matrix, encryption = False):
 
     if not utils.invertible(matrix):
         # The matrix should be invertible.
-        return "Non invertible matrix"
-    if len(message) % 2 != 0:
-        message = message + 'X'
-    couple = [list(message[i*2:(i*2)+2]) for i in range(0, len(message)/2)]
-    result = [i[:] for i in couple]
-    if not encryption:
-        # To decrypt, just need to inverse the matrix.
-        matrix = utils.inverse_matrix(matrix)
-    for i, c in enumerate(couple):
-        if c[0].isalpha() and c[1].isalpha():
-            result[i][0] = chr(((ord(c[0])-65) * matrix[0][0] + \
-                                    (ord(c[1])-65) * matrix[0][1]) % 26 + 65)
-            result[i][1] = chr(((ord(c[0])-65) * matrix[1][0] + \
-                                    (ord(c[1])-65) * matrix[1][1]) % 26 + 65)
-    return "".join(["".join(i) for i in result])
+        raise Exception, "Non invertible matrix. Please enter a matrix that is invertible."
+
+    try:
+        if len(message) % 2 != 0:
+            message = message + 'X'
+        couple = [list(message[i*2:(i*2)+2]) for i in range(0, len(message)/2)]
+        result = [i[:] for i in couple]
+        if not encryption:
+            # To decrypt, just need to inverse the matrix.
+            matrix = utils.inverse_matrix(matrix)
+        for i, c in enumerate(couple):
+            if c[0].isalpha() and c[1].isalpha():
+                result[i][0] = chr(((ord(c[0])-65) * matrix[0][0] + \
+                                        (ord(c[1])-65) * matrix[0][1]) % 26 + 65)
+                result[i][1] = chr(((ord(c[0])-65) * matrix[1][0] + \
+                                        (ord(c[1])-65) * matrix[1][1]) % 26 + 65)
+        return "".join(["".join(i) for i in result])
+
+    except:
+        raise Exception, "Input is not valid. Please enter valid matrix."

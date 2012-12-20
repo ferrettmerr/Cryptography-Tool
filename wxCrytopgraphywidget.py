@@ -96,6 +96,10 @@ class MainWindow(wx.Frame):
         self.encrypted.SetValue("")
         self.cipher_info.SetLabel("")
 
+        self.decrypted.SetFocus()
+        self.encrypted.SetFocus()
+        self.decrypted.SetFocus()
+
         #Get the cipher that is selected
         input_object = event.GetEventObject()
         cipher = input_object.GetValue()
@@ -142,14 +146,27 @@ class MainWindow(wx.Frame):
             cipher_dict = dict()
             for k,v in self.dictionary.iteritems():
                 cipher_dict[chr(v.GetId() + 96).upper()] = k
+            try:
+                encrypted_text = substitution(plain_text, cipher_dict)
+                self.encrypted.SetValue(encrypted_text)
+            except Exception, e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
-            encrypted_text = substitution(plain_text, cipher_dict)
-            self.encrypted.SetValue(encrypted_text)
         elif cipher == "Permutation":
-            cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
+            try:
+                cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
 
-            encrypted_text = permutation(plain_text, cipher_text)
-            self.encrypted.SetValue(encrypted_text)
+                encrypted_text = permutation(plain_text, cipher_text)
+                self.encrypted.SetValue(encrypted_text)
+            except Exception ,e:
+                dlg = wx.MessageDialog(self,
+                   "Input is not valid. Please ensure it is in the correct format.",
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
+
 
         elif cipher == "Vigenere":
 
@@ -163,19 +180,27 @@ class MainWindow(wx.Frame):
             long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
 
             if len(long_key) < len(plain_text):
+                dlg = wx.MessageDialog(self,
+                    "Key is not long enough. Key needs to be longer than the plain text.", "Error", wx.OK)
+                result = dlg.ShowModal()
                 return
 
             encrypted_text = one_time_pad(plain_text, long_key, False)
             self.encrypted.SetValue(encrypted_text)
 
         elif cipher == "Hill":
+            try:
+                matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
 
-            matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
+                json_value = json.loads(matrix)
 
-            json_value = json.loads(matrix)
-
-            encrypted_text = hill(plain_text, json_value, False)
-            self.encrypted.SetValue(encrypted_text)
+                encrypted_text = hill(plain_text, json_value, False)
+                self.encrypted.SetValue(encrypted_text)
+            except Exception ,e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
 
     def decrypt_pressed(self, event):
@@ -189,6 +214,7 @@ class MainWindow(wx.Frame):
         if cipher == "Shift":
             plain_text = shift(encrypted_text, int(self.shift_combo.GetValue()), True)
             self.decrypted.SetValue(plain_text)
+
         
         elif cipher == "Affine":
             a = int(self.a.GetValue())
@@ -203,14 +229,25 @@ class MainWindow(wx.Frame):
             for k,v in self.dictionary.iteritems():
                 cipher_dict[k] = chr(v.GetId() + 96).upper()
             
-            plain_text = substitution(encrypted_text, cipher_dict, True)
-            self.decrypted.SetValue(plain_text)
+            try:
+                plain_text = substitution(encrypted_text, cipher_dict, True)
+                self.decrypted.SetValue(plain_text)
+            except Exception, e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
         elif cipher == "Permutation":
             cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
-
-            decrypted_text = permutation(encrypted_text, cipher_text, True)
-            self.decrypted.SetValue(decrypted_text)
+            try:
+                decrypted_text = permutation(encrypted_text, cipher_text, True)
+                self.decrypted.SetValue(decrypted_text)
+            except Exception ,e:
+                dlg = wx.MessageDialog(self,
+                    "Input is not valid. Please ensure it is in the correct format.",
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
         elif cipher == "Vigenere":
             decrypted_text = vigenere(encrypted_text, self.keyword.GetValue().encode('ascii','ignore').upper(), True)
             self.decrypted.SetValue(decrypted_text)
@@ -218,18 +255,26 @@ class MainWindow(wx.Frame):
             long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
 
             if len(long_key) < len(encrypted_text):
+                dlg = wx.MessageDialog(self,
+                    "Key is not long enough. Key needs to be longer than the plain text.", "Error", wx.OK)
+                result = dlg.ShowModal()
                 return
             decrypted_text = one_time_pad(encrypted_text, long_key, True)
             self.decrypted.SetValue(decrypted_text)
 
         elif cipher == "Hill":
+            try:
+                matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
 
-            matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
+                json_value = json.loads(matrix)
 
-            json_value = json.loads(matrix)
-
-            decrypted_text = hill(encrypted_text, json_value, True)
-            self.decrypted.SetValue(decrypted_text)
+                decrypted_text = hill(encrypted_text, json_value, True)
+                self.decrypted.SetValue(decrypted_text)
+            except Exception ,e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
     def set_to_shift(self):
         self.cipher_info.SetLabel("The Shift Cipher, also known as Ceasar Cipher, shifts each character by adding x to each character. \r\n More info: http://en.wikipedia.org/wiki/Caesar_cipher")
@@ -237,7 +282,7 @@ class MainWindow(wx.Frame):
         shift_txt = wx.StaticText(self.panel, label="Right shift by:", pos=(self.width/2-140, self.cipher_y))
         
         shiftAmounts = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25']
-        self.shift_combo = wx.ComboBox(self.panel, -1, pos=(self.width/2 - 40, self.cipher_y), size=(80, -1), choices=shiftAmounts, style=wx.CB_READONLY)
+        self.shift_combo = wx.ComboBox(self.panel, -1,value=shiftAmounts[0], pos=(self.width/2 - 40, self.cipher_y), size=(80, -1), choices=shiftAmounts, style=wx.CB_READONLY)
 
 
         self.widgetSizer.Add(self.shift_combo, 0, wx.ALL, 5)
@@ -253,8 +298,10 @@ class MainWindow(wx.Frame):
         aValues = ['1','3','5','7','9','11','15','17','19','21','23','25']
         bValues = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25']
 
-        self.a = wx.ComboBox(self.panel, -1, pos=(self.width/2 - 86, self.cipher_y), size=(75, -1), choices=aValues, style=wx.CB_READONLY)
-        self.b = wx.ComboBox(self.panel, -1, pos=(self.width/2 + 14, self.cipher_y), size=(75, -1), choices=bValues, style=wx.CB_READONLY)
+        self.a = wx.ComboBox(self.panel, -1,value=aValues[0], pos=(self.width/2 - 86, self.cipher_y), size=(75, -1), choices=aValues, style=wx.CB_READONLY)
+        self.b = wx.ComboBox(self.panel, -1,value=bValues[0], pos=(self.width/2 + 14, self.cipher_y), size=(75, -1), choices=bValues, style=wx.CB_READONLY)
+
+        self.cipher_info.SetLabel("The Affine Cipher. \r\n More info: http://en.wikipedia.org/wiki/Affine_cipher")
 
         self.widgetSizer.Add(self.a, 0, wx.ALL, 5)
         self.widgetSizer.Add(self.b, 0, wx.ALL, 5)
