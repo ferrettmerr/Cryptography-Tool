@@ -97,13 +97,6 @@ class MainWindow(wx.Frame):
         self.encrypted.SetValue("")
         self.cipher_info.SetLabel("")
 
-        # Dynamic TextControls do clean properly because of focus, this is a hack, VIGENERE NOT CLEANING UP PROPERLY
-        # DO NOT REMOVE THIS, UNLESS YOU KNOW HOW TO FIX IT
-        self.decrypted.SetFocus()
-        self.encrypted.SetFocus()
-        self.decrypted.SetFocus()
-
-
         #Get the cipher that is selected
         input_object = event.GetEventObject()
         cipher = input_object.GetValue()
@@ -123,6 +116,8 @@ class MainWindow(wx.Frame):
             self.set_to_one_time_pad()
         elif cipher == "Hill":
             self.set_to_hill()
+
+        self.decrypted.SetFocus()
 
     def encrypt_pressed(self, event):
         cipher = self.combo_box.GetValue()
@@ -194,6 +189,7 @@ class MainWindow(wx.Frame):
         if cipher == "Shift":
             plain_text = shift(encrypted_text, int(self.shift_combo.GetValue()), True)
             self.decrypted.SetValue(plain_text)
+
         
         elif cipher == "Affine":
             a = int(self.a.GetValue())
@@ -239,7 +235,7 @@ class MainWindow(wx.Frame):
         shift_txt = wx.StaticText(self.panel, label="Right shift by:", pos=(self.width/2-140, self.cipher_y))
         
         shiftAmounts = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25']
-        self.shift_combo = wx.ComboBox(self.panel, -1, pos=(self.width/2 - 40, self.cipher_y), size=(80, -1), choices=shiftAmounts, style=wx.CB_READONLY)
+        self.shift_combo = wx.ComboBox(self.panel, -1,value=shiftAmounts[0], pos=(self.width/2 - 40, self.cipher_y), size=(80, -1), choices=shiftAmounts, style=wx.CB_READONLY)
 
         self.cipher_info.SetLabel("The Shift Cipher, also known as Ceasar Cipher, shifts each character by adding x to each character. \r\n More info: http://en.wikipedia.org/wiki/Caesar_cipher")
 
@@ -247,6 +243,12 @@ class MainWindow(wx.Frame):
         self.widgetSizer.Add(shift_txt, 0, wx.ALL, 5)
 
     def set_to_affine(self):
+
+        # dlg = wx.MessageDialog(self,
+        #      "Do you really want to close this application?",
+        #     "Error", wx.OK)
+        # result = dlg.ShowModal()
+
         a_txt = wx.StaticText(self.panel, label="A:", pos=(self.width/2 - 100, self.cipher_y))
         b_txt = wx.StaticText(self.panel, label="B:", pos=(self.width/2, self.cipher_y))
 
@@ -254,8 +256,10 @@ class MainWindow(wx.Frame):
         aValues = ['1','3','5','7','9','11','15','17','19','21','23','25']
         bValues = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25']
 
-        self.a = wx.ComboBox(self.panel, -1, pos=(self.width/2 - 86, self.cipher_y), size=(75, -1), choices=aValues, style=wx.CB_READONLY)
-        self.b = wx.ComboBox(self.panel, -1, pos=(self.width/2 + 14, self.cipher_y), size=(75, -1), choices=bValues, style=wx.CB_READONLY)
+        self.a = wx.ComboBox(self.panel, -1,value=aValues[0], pos=(self.width/2 - 86, self.cipher_y), size=(75, -1), choices=aValues, style=wx.CB_READONLY)
+        self.b = wx.ComboBox(self.panel, -1,value=bValues[0], pos=(self.width/2 + 14, self.cipher_y), size=(75, -1), choices=bValues, style=wx.CB_READONLY)
+
+        self.cipher_info.SetLabel("The Affine Cipher. \r\n More info: http://en.wikipedia.org/wiki/Affine_cipher")
 
         self.widgetSizer.Add(self.a, 0, wx.ALL, 5)
         self.widgetSizer.Add(self.b, 0, wx.ALL, 5)
