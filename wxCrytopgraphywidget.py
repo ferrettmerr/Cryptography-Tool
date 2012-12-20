@@ -97,6 +97,11 @@ class MainWindow(wx.Frame):
         self.encrypted.SetValue("")
         self.cipher_info.SetLabel("")
 
+
+        self.decrypted.SetFocus()
+        self.encrypted.SetFocus()
+        self.decrypted.SetFocus()
+
         #Get the cipher that is selected
         input_object = event.GetEventObject()
         cipher = input_object.GetValue()
@@ -117,7 +122,6 @@ class MainWindow(wx.Frame):
         elif cipher == "Hill":
             self.set_to_hill()
 
-        self.decrypted.SetFocus()
 
     def encrypt_pressed(self, event):
         cipher = self.combo_box.GetValue()
@@ -145,11 +149,20 @@ class MainWindow(wx.Frame):
 
             encrypted_text = substitution(plain_text, cipher_dict)
             self.encrypted.SetValue(encrypted_text)
-        elif cipher == "Permutation":
-            cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
 
-            encrypted_text = permutation(plain_text, cipher_text)
-            self.encrypted.SetValue(encrypted_text)
+
+
+        elif cipher == "Permutation":
+            try:
+                cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
+
+                encrypted_text = permutation(plain_text, cipher_text)
+                self.encrypted.SetValue(encrypted_text)
+            except Exception ,e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
         elif cipher == "Vigenere":
 
@@ -163,19 +176,27 @@ class MainWindow(wx.Frame):
             long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
 
             if len(long_key) < len(plain_text):
+                dlg = wx.MessageDialog(self,
+                    "Key is not long enough. Key needs to be longer than the plain text.", "Error", wx.OK)
+                result = dlg.ShowModal()
                 return
 
             encrypted_text = one_time_pad(plain_text, long_key, False)
             self.encrypted.SetValue(encrypted_text)
 
         elif cipher == "Hill":
+            try:
+                matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
 
-            matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
+                json_value = json.loads(matrix)
 
-            json_value = json.loads(matrix)
-
-            encrypted_text = hill(plain_text, json_value, False)
-            self.encrypted.SetValue(encrypted_text)
+                encrypted_text = hill(plain_text, json_value, False)
+                self.encrypted.SetValue(encrypted_text)
+            except Exception ,e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
 
     def decrypt_pressed(self, event):
