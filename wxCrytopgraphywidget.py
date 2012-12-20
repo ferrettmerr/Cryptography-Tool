@@ -97,7 +97,7 @@ class MainWindow(wx.Frame):
         self.encrypted.SetValue("")
         self.cipher_info.SetLabel("")
 
-
+        #Keep this to prevent grey box from displaying, Hack, but vital until fix is found
         self.decrypted.SetFocus()
         self.encrypted.SetFocus()
         self.decrypted.SetFocus()
@@ -146,11 +146,14 @@ class MainWindow(wx.Frame):
             cipher_dict = dict()
             for k,v in self.dictionary.iteritems():
                 cipher_dict[v.GetName()] = k;
-
-            encrypted_text = substitution(plain_text, cipher_dict)
-            self.encrypted.SetValue(encrypted_text)
-
-
+            try:
+                encrypted_text = substitution(plain_text, cipher_dict)
+                self.encrypted.SetValue(encrypted_text)
+            except Exception, e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
         elif cipher == "Permutation":
             try:
@@ -163,6 +166,7 @@ class MainWindow(wx.Frame):
                     str(e),
                     "Error", wx.OK)
                 result = dlg.ShowModal()
+
 
         elif cipher == "Vigenere":
 
@@ -224,14 +228,25 @@ class MainWindow(wx.Frame):
             for k,v in self.dictionary.iteritems():
                 cipher_dict[v.GetName()] = k;
             
-            plain_text = substitution(encrypted_text, cipher_dict, True)
-            self.decrypted.SetValue(plain_text)
+            try:
+                plain_text = substitution(encrypted_text, cipher_dict, True)
+                self.decrypted.SetValue(plain_text)
+            except Exception, e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
         elif cipher == "Permutation":
             cipher_text = [int(x) for x in self.cipher_text.GetValue().split(' ')]
-
-            decrypted_text = permutation(encrypted_text, cipher_text, True)
-            self.decrypted.SetValue(decrypted_text)
+            try:
+                decrypted_text = permutation(encrypted_text, cipher_text, True)
+                self.decrypted.SetValue(decrypted_text)
+            except Exception ,e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
         elif cipher == "Vigenere":
             decrypted_text = vigenere(encrypted_text, self.keyword.GetValue().encode('ascii','ignore').upper(), True)
             self.decrypted.SetValue(decrypted_text)
@@ -239,18 +254,26 @@ class MainWindow(wx.Frame):
             long_key = self.keyphase.GetValue().encode('ascii','ignore').upper().replace(' ', '')
 
             if len(long_key) < len(encrypted_text):
+                dlg = wx.MessageDialog(self,
+                    "Key is not long enough. Key needs to be longer than the plain text.", "Error", wx.OK)
+                result = dlg.ShowModal()
                 return
             decrypted_text = one_time_pad(encrypted_text, long_key, True)
             self.decrypted.SetValue(decrypted_text)
 
         elif cipher == "Hill":
+            try:
+                matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
 
-            matrix = self.matrix.GetValue().encode('ascii','ignore').replace(' ', '')
+                json_value = json.loads(matrix)
 
-            json_value = json.loads(matrix)
-
-            decrypted_text = hill(encrypted_text, json_value, True)
-            self.decrypted.SetValue(decrypted_text)
+                decrypted_text = hill(encrypted_text, json_value, True)
+                self.decrypted.SetValue(decrypted_text)
+            except Exception ,e:
+                dlg = wx.MessageDialog(self,
+                    str(e),
+                    "Error", wx.OK)
+                result = dlg.ShowModal()
 
     def set_to_shift(self):
         shift_txt = wx.StaticText(self.panel, label="Right shift by:", pos=(self.width/2-140, self.cipher_y))
@@ -264,11 +287,6 @@ class MainWindow(wx.Frame):
         self.widgetSizer.Add(shift_txt, 0, wx.ALL, 5)
 
     def set_to_affine(self):
-
-        # dlg = wx.MessageDialog(self,
-        #      "Do you really want to close this application?",
-        #     "Error", wx.OK)
-        # result = dlg.ShowModal()
 
         a_txt = wx.StaticText(self.panel, label="A:", pos=(self.width/2 - 100, self.cipher_y))
         b_txt = wx.StaticText(self.panel, label="B:", pos=(self.width/2, self.cipher_y))

@@ -49,6 +49,8 @@ def substitution(message, substitutions, decrypt = False):
     for char in message:
         if (char in substitutions):
             new_message += substitutions[char]
+        else:
+            raise Exception, "Inputted Character(s) need to be set."
     
 
     return new_message
