@@ -34,7 +34,7 @@ class MainWindow(wx.Frame):
     def init_gui(self):
         self.panel = wx.Panel(self)
 
-        #TODO WHat do these do?
+        #Widget Sizer for dynamic GUI values
         self.widgetSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.panel.SetSizer(self.widgetSizer)
         
@@ -95,6 +95,14 @@ class MainWindow(wx.Frame):
 
         # Reset encrypted text field only, incase same message wants to be used for different encryptions
         self.encrypted.SetValue("")
+        self.cipher_info.SetLabel("")
+
+        # Dynamic TextControls do clean properly because of focus, this is a hack, VIGENERE NOT CLEANING UP PROPERLY
+        # DO NOT REMOVE THIS, UNLESS YOU KNOW HOW TO FIX IT
+        self.decrypted.SetFocus()
+        self.encrypted.SetFocus()
+        self.decrypted.SetFocus()
+
 
         #Get the cipher that is selected
         input_object = event.GetEventObject()
@@ -139,6 +147,7 @@ class MainWindow(wx.Frame):
             cipher_dict = dict()
             for k,v in self.dictionary.iteritems():
                 cipher_dict[v.GetName()] = k;
+
             encrypted_text = substitution(plain_text, cipher_dict)
             self.encrypted.SetValue(encrypted_text)
         elif cipher == "Permutation":
@@ -233,6 +242,7 @@ class MainWindow(wx.Frame):
         self.shift_combo = wx.ComboBox(self.panel, -1, pos=(self.width/2 - 40, self.cipher_y), size=(80, -1), choices=shiftAmounts, style=wx.CB_READONLY)
 
         self.cipher_info.SetLabel("The Shift Cipher, also known as Ceasar Cipher, shifts each character by adding x to each character. \r\n More info: http://en.wikipedia.org/wiki/Caesar_cipher")
+
         self.widgetSizer.Add(self.shift_combo, 0, wx.ALL, 5)
         self.widgetSizer.Add(shift_txt, 0, wx.ALL, 5)
 
@@ -296,11 +306,11 @@ class MainWindow(wx.Frame):
 
 
     def set_to_permutation(self):
-        description = wx.StaticText(self.panel, style=wx.ALIGN_CENTRE, label="Enter positions of blocks separated by spaces that is the specified size.\n Example: 1 4 3 2 5", pos=((self.width-500)/2, self.cipher_y), size=(500, -1))
+        description = wx.StaticText(self.panel, style=wx.ALIGN_CENTRE, label="Enter positions of blocks separated by spaces that is the specified size.\n Example: 1 4 3 2 5", pos=((self.width-500)/2, self.cipher_y + 30), size=(500, -1))
 
-        cipher_txt = wx.StaticText(self.panel, label="Permutation array:", pos=(self.width/2 - 135, self.cipher_y + 35))
+        cipher_txt = wx.StaticText(self.panel, label="Permutation array:", pos=(self.width/2 - 235, self.cipher_y))
         
-        self.cipher_text = wx.TextCtrl(self.panel, -1, '',pos=(self.width/2 , self.cipher_y + 35), size=(150, -1))
+        self.cipher_text = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3 , self.cipher_y), size=(250, -1))
 
         self.widgetSizer.Add(description, 0, wx.ALL, 5)
         self.widgetSizer.Add(cipher_txt, 0, wx.ALL, 5)
@@ -308,7 +318,7 @@ class MainWindow(wx.Frame):
 
     def set_to_vigenere(self):
         keyword_txt = wx.StaticText(self.panel, label="Keyword:", pos=(self.width/3 -65, self.cipher_y))
-        keyword_description = wx.StaticText(self.panel, label="Pick a keyword that is between 3-6 letters.", pos=(self.width/3 - 10, self.cipher_y))
+        keyword_description = wx.StaticText(self.panel, label="Pick a keyword that is between 3-6 letters.", pos=(self.width/3 - 10, self.cipher_y+ 30))
         self.keyword = wx.TextCtrl(self.panel, 9, '',pos=(self.width/3,self.cipher_y), size=(250, -1))#TODO parse for only ascii chars
 
         self.widgetSizer.Add(keyword_txt, 0, wx.ALL, 5)
@@ -318,7 +328,7 @@ class MainWindow(wx.Frame):
 
     def set_to_one_time_pad(self):        
         key_phase_txt = wx.StaticText(self.panel, label="Key phase:", pos=(self.width/3 -70, self.cipher_y))
-        description_txt = wx.StaticText(self.panel, label="The key phase has to be just as long as the decrypted message or longer.", pos=(self.width/6, self.cipher_y))
+        description_txt = wx.StaticText(self.panel, label="The key phase has to be just as long as the decrypted message or longer.", pos=(self.width/6, self.cipher_y + 30))
         self.keyphase = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,self.cipher_y), size=(250, -1))#TODO parse for only ascii chars and limit messsage
 
         self.widgetSizer.Add(key_phase_txt, 0, wx.ALL, 5)
@@ -327,7 +337,7 @@ class MainWindow(wx.Frame):
 
     def set_to_hill(self):
         matrix_txt = wx.StaticText(self.panel, label="Matrix:", pos=(self.width/3 -50, self.cipher_y))
-        description_txt = wx.StaticText(self.panel, label="Enter a matrix that is in the format [[11, 3],[8, 7]] with values modulos of 25.", pos=(self.width/6, 75))
+        description_txt = wx.StaticText(self.panel, label="Enter a matrix that is in the format [[11, 3],[8, 7]] with values modulos of 25.", pos=(self.width/6, self.cipher_y + 30))
         self.matrix = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,self.cipher_y), size=(250, -1))#TODO parse for only ascii chars
 
         self.widgetSizer.Add(matrix_txt, 0, wx.ALL, 5)
