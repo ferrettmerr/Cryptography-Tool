@@ -92,22 +92,13 @@ class MainWindow(wx.Frame):
     def OnSelect(self, event):     
         self.widgetSizer.DeleteWindows()
 
-
         # Reset encrypted text field only, incase same message wants to be used for different encryptions
         self.encrypted.SetValue("")
         self.cipher_info.SetLabel("")
 
-        # Dynamic TextControls do clean properly because of focus, this is a hack, VIGENERE NOT CLEANING UP PROPERLY
-        # DO NOT REMOVE THIS, UNLESS YOU KNOW HOW TO FIX IT
-        self.decrypted.SetFocus()
-        self.encrypted.SetFocus()
-        self.decrypted.SetFocus()
-
-
         #Get the cipher that is selected
         input_object = event.GetEventObject()
         cipher = input_object.GetValue()
-
         
         if cipher == "Shift":
             self.set_to_shift()
@@ -124,6 +115,10 @@ class MainWindow(wx.Frame):
         elif cipher == "Hill":
             self.set_to_hill()
 
+        #This must be done to stop the border around the text box to go way.
+        self.decrypted.SetFocus()
+        self.encrypted.SetFocus()
+        self.decrypted.SetFocus()
     def encrypt_pressed(self, event):
         cipher = self.combo_box.GetValue()
 
@@ -146,7 +141,7 @@ class MainWindow(wx.Frame):
         elif cipher == "Substitution":
             cipher_dict = dict()
             for k,v in self.dictionary.iteritems():
-                cipher_dict[v.GetName()] = k;
+                cipher_dict[chr(v.GetId() + 96).upper()] = k
 
             encrypted_text = substitution(plain_text, cipher_dict)
             self.encrypted.SetValue(encrypted_text)
@@ -204,8 +199,9 @@ class MainWindow(wx.Frame):
         
         elif cipher == "Substitution":
             cipher_dict = dict()
+            cipher_dict = dict()
             for k,v in self.dictionary.iteritems():
-                cipher_dict[v.GetName()] = k;
+                cipher_dict[k] = chr(v.GetId() + 96).upper()
             
             plain_text = substitution(encrypted_text, cipher_dict, True)
             self.decrypted.SetValue(plain_text)
@@ -236,17 +232,20 @@ class MainWindow(wx.Frame):
             self.decrypted.SetValue(decrypted_text)
 
     def set_to_shift(self):
+        self.cipher_info.SetLabel("The Shift Cipher, also known as Ceasar Cipher, shifts each character by adding x to each character. \r\n More info: http://en.wikipedia.org/wiki/Caesar_cipher")
+
         shift_txt = wx.StaticText(self.panel, label="Right shift by:", pos=(self.width/2-140, self.cipher_y))
         
         shiftAmounts = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25']
         self.shift_combo = wx.ComboBox(self.panel, -1, pos=(self.width/2 - 40, self.cipher_y), size=(80, -1), choices=shiftAmounts, style=wx.CB_READONLY)
 
-        self.cipher_info.SetLabel("The Shift Cipher, also known as Ceasar Cipher, shifts each character by adding x to each character. \r\n More info: http://en.wikipedia.org/wiki/Caesar_cipher")
 
         self.widgetSizer.Add(self.shift_combo, 0, wx.ALL, 5)
         self.widgetSizer.Add(shift_txt, 0, wx.ALL, 5)
 
     def set_to_affine(self):
+        self.cipher_info.SetLabel("The Affine Cipher shifts letters by: ax + b mod 26. x is the original letter, a is a relative prime to 26 and b is 0-25.\r\n More info: http://en.wikipedia.org/wiki/Affine_cipher")
+
         a_txt = wx.StaticText(self.panel, label="A:", pos=(self.width/2 - 100, self.cipher_y))
         b_txt = wx.StaticText(self.panel, label="B:", pos=(self.width/2, self.cipher_y))
 
@@ -263,6 +262,8 @@ class MainWindow(wx.Frame):
         self.widgetSizer.Add(b_txt, 0, wx.ALL, 5)
 
     def set_to_substitution(self):
+        self.cipher_info.SetLabel("The Substitution Cipher exchanges one letter for another letter.\r\n More info: http://en.wikipedia.org/wiki/Substitution_cipher")
+
         # need a-z mapping, use dictionary
         pos_x = 12
         pos_y = self.cipher_y
@@ -273,40 +274,56 @@ class MainWindow(wx.Frame):
         remaining_values = [' '] + remaining_values
 
         # layout and crete alphabet
+        index = 1
         for key in remaining_values:
             if key == ' ':
                 continue
             letter_label = wx.StaticText(self.panel,label=key+":", pos=(pos_x, pos_y))
             pos_x += 20 
-            letter_btn = wx.ComboBox(self.panel, -1, pos=(pos_x,pos_y), size=(50, -1),choices=remaining_values, style=wx.CB_READONLY, name=key)
+            letter_btn = wx.ComboBox(self.panel, index, pos=(pos_x,pos_y), size=(50, -1),choices=remaining_values, style=wx.CB_READONLY, name=key)
             letter_btn.Bind(wx.EVT_COMBOBOX, self.on_letter_choice)
 
             pos_x += 55
             if pos_x > 650:
                 pos_x = 12
                 pos_y += 20
-                        
+            
+            index+=1       
             self.widgetSizer.Add(letter_label, 0, wx.ALL, 5)
             self.widgetSizer.Add(letter_btn, 0, wx.ALL, 5)
+
+
+    #Data model:
+    # Hash of value => combo box
+    # Combo box id - 9000 = letter
 
     def on_letter_choice(self, e):
 
         event_object = e.GetEventObject()
         value = event_object.GetValue()
+
+        key_to_delete = ''
+        for k,v in self.dictionary.iteritems():
+            if v == event_object:
+                key_to_delete = k
+                break          
+
+        if key_to_delete != '':
+            del self.dictionary[key_to_delete]
+        
         if (value in self.dictionary and event_object != self.dictionary[value]):
             self.dictionary[value].SetStringSelection(' ')
             del self.dictionary[value]
-        elif value == ' ':
-            for k,v in self.dictionary.iteritems():
-                if v == event_object:
-                    del self.dictionary[k]
-                    
-        self.dictionary[value] = event_object
+        
+        if value != ' ':        
+            self.dictionary[value] = event_object
 
 
 
     def set_to_permutation(self):
-        description = wx.StaticText(self.panel, style=wx.ALIGN_CENTRE, label="Enter positions of blocks separated by spaces that is the specified size.\n Example: 1 4 3 2 5", pos=((self.width-500)/2, self.cipher_y + 30), size=(500, -1))
+        self.cipher_info.SetLabel("The Permutation Cipher swaps letters within a block of size n. Entering the example below would make the first letter the second and so on. \r\n More info: http://en.wikipedia.org/wiki/Permutation_cipher")
+
+        description = wx.StaticText(self.panel, style=wx.ALIGN_CENTRE, label="Enter positions of blocks separated by spaces that is the specified size.\n Example: 2 4 3 1 5", pos=((self.width-500)/2, self.cipher_y + 30), size=(500, -1))
 
         cipher_txt = wx.StaticText(self.panel, label="Permutation array:", pos=(self.width/2 - 235, self.cipher_y))
         
@@ -317,9 +334,10 @@ class MainWindow(wx.Frame):
         self.widgetSizer.Add(self.cipher_text, 0, wx.ALL, 5)
 
     def set_to_vigenere(self):
+        self.cipher_info.SetLabel("The Vigenere Cipher encrypts by using a series of repeating Shift Ciphers with a keyword. \r\n More info: http://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher")
         keyword_txt = wx.StaticText(self.panel, label="Keyword:", pos=(self.width/3 -65, self.cipher_y))
         keyword_description = wx.StaticText(self.panel, label="Pick a keyword that is between 3-6 letters.", pos=(self.width/3 - 10, self.cipher_y+ 30))
-        self.keyword = wx.TextCtrl(self.panel, 9, '',pos=(self.width/3,self.cipher_y), size=(250, -1))#TODO parse for only ascii chars
+        self.keyword = wx.TextCtrl(self.panel, 9, '',pos=(self.width/3,self.cipher_y), size=(250, -1))
 
         self.widgetSizer.Add(keyword_txt, 0, wx.ALL, 5)
         self.widgetSizer.Add(keyword_description, 0, wx.ALL, 5)
@@ -327,18 +345,21 @@ class MainWindow(wx.Frame):
      
 
     def set_to_one_time_pad(self):        
+        self.cipher_info.SetLabel("The One Time Pad Cipher encrypts by using a series of Shift Ciphers with a long key that does not repeat. \r\n More info: http://en.wikipedia.org/wiki/One-time_pad")
         key_phase_txt = wx.StaticText(self.panel, label="Key phase:", pos=(self.width/3 -70, self.cipher_y))
         description_txt = wx.StaticText(self.panel, label="The key phase has to be just as long as the decrypted message or longer.", pos=(self.width/6, self.cipher_y + 30))
-        self.keyphase = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,self.cipher_y), size=(250, -1))#TODO parse for only ascii chars and limit messsage
+        self.keyphase = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,self.cipher_y), size=(250, -1))
 
         self.widgetSizer.Add(key_phase_txt, 0, wx.ALL, 5)
         self.widgetSizer.Add(description_txt, 0, wx.ALL, 5)
         self.widgetSizer.Add(self.keyphase, 0, wx.ALL, 5)
 
     def set_to_hill(self):
+        self.cipher_info.SetLabel("The Hill Cipher uses an invertable matrix to encode the message. \r\n More info: http://en.wikipedia.org/wiki/Hill_cipher")
+        
         matrix_txt = wx.StaticText(self.panel, label="Matrix:", pos=(self.width/3 -50, self.cipher_y))
         description_txt = wx.StaticText(self.panel, label="Enter a matrix that is in the format [[11, 3],[8, 7]] with values modulos of 25.", pos=(self.width/6, self.cipher_y + 30))
-        self.matrix = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,self.cipher_y), size=(250, -1))#TODO parse for only ascii chars
+        self.matrix = wx.TextCtrl(self.panel, -1, '',pos=(self.width/3,self.cipher_y), size=(250, -1))
 
         self.widgetSizer.Add(matrix_txt, 0, wx.ALL, 5)
         self.widgetSizer.Add(description_txt, 0, wx.ALL, 5)
