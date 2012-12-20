@@ -15,3 +15,5 @@ Prequisites
 	Python 2.7
 
 
+After building run the following to get rid of 64 bit and force 32 bit.
+ditto --rsrc --arch i386 YourApplication.app YourApplicationStripped.app
